@@ -1,0 +1,147 @@
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+
+local player = Players.LocalPlayer
+local G = { unwalkSavedAnimate = nil }
+
+-- GUI MAIN
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "MurderHub_Desync"
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 280, 0, 210)
+main.Position = UDim2.new(0.5, -140, 0.4, 0)
+main.BackgroundColor3 = Color3.fromRGB(13, 13, 15)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+-- TITLE
+local title = Instance.new("TextLabel", main)
+title.Text = "MURDER HUB DESYNC"
+title.Size = UDim2.new(0, 180, 0, 30)
+title.Position = UDim2.new(0, 15, 0, 8)
+title.TextColor3 = Color3.new(1, 1, 1)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.BackgroundTransparency = 1
+
+-- DISCORD
+local discord = Instance.new("TextLabel", main)
+discord.Text = "discord.gg/envyhub"
+discord.Size = UDim2.new(0, 150, 0, 15)
+discord.Position = UDim2.new(0, 15, 0, 33)
+discord.TextColor3 = Color3.fromRGB(80, 80, 85)
+discord.Font = Enum.Font.Gotham
+discord.TextSize = 10
+discord.TextXAlignment = Enum.TextXAlignment.Left
+discord.BackgroundTransparency = 1
+
+-- CLOSE BUTTON
+local close = Instance.new("TextButton", main)
+close.Size = UDim2.new(0, 28, 0, 28)
+close.Position = UDim2.new(1, -38, 0, 10)
+close.BackgroundColor3 = Color3.fromRGB(22, 22, 25)
+close.Text = "×"
+close.TextColor3 = Color3.fromRGB(120, 120, 120)
+close.Font = Enum.Font.GothamBold
+close.TextSize = 18
+Instance.new("UICorner", close)
+close.MouseButton1Click:Connect(function() gui:Destroy() end)
+
+-- STATUS
+local status = Instance.new("TextLabel", main)
+status.Text = "Inactive"
+status.Size = UDim2.new(0, 100, 0, 25)
+status.Position = UDim2.new(0, 15, 0, 55)
+status.TextColor3 = Color3.fromRGB(65, 65, 70)
+status.Font = Enum.Font.Gotham
+status.TextSize = 14
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.BackgroundTransparency = 1
+
+-- BUTTON MAKER
+local function makeBtn(text, y)
+    local btn = Instance.new("TextButton", main)
+    btn.Size = UDim2.new(0.9, 0, 0, 42)
+    btn.Position = UDim2.new(0.05, 0, 0, y)
+    btn.BackgroundColor3 = Color3.fromRGB(18, 18, 21)
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 13
+    Instance.new("UICorner", btn)
+    return btn
+end
+
+local desyncBtn = makeBtn("ACTIVATE", 90)
+local unwalkBtn = makeBtn("UNWALK: OFF", 140)
+
+-- UNWALK LOGIC (Restores/Destroys Animate script)
+local function startUnwalk()
+    local c = player.Character;
+    if not c then return end
+    local hum = c:FindFirstChildOfClass("Humanoid");
+    if hum then
+        for _, t in ipairs(hum:GetPlayingAnimationTracks()) do t:Stop() end
+        hum.WalkSpeed = 0
+        hum.JumpPower = 0
+    end
+    local anim = c:FindFirstChild("Animate");
+    if anim then
+        G.unwalkSavedAnimate = anim:Clone();
+        anim:Destroy()
+    end
+end
+
+local function stopUnwalk()
+    local c = player.Character;
+    if c then
+        local hum = c:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = 16 hum.JumpPower = 50 end
+        if G.unwalkSavedAnimate then
+            G.unwalkSavedAnimate:Clone().Parent = c;
+            G.unwalkSavedAnimate = nil
+        end
+    end
+end
+
+-- MAIN TOGGLES
+local desyncEnabled = false
+local unwalkEnabled = false
+
+desyncBtn.MouseButton1Click:Connect(function()
+    desyncEnabled = not desyncEnabled
+    
+    if desyncEnabled then
+        -- ENABLE DESYNC (raknet source)
+        pcall(function()
+            if raknet then raknet.desync(true) end
+            local character = player.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.Health = 0 -- Required respawn logic
+                task.wait(0.5)
+            end
+        end)
+        desyncBtn.Text = "DEACTIVATE"
+        status.Text = "Active"
+        status.TextColor3 = Color3.fromRGB(255, 255, 255)
+    else
+        -- DISABLE DESYNC
+        pcall(function()
+            if raknet then raknet.desync(false) end
+        end)
+        desyncBtn.Text = "ACTIVATE"
+        status.Text = "Inactive"
+        status.TextColor3 = Color3.fromRGB(65, 65, 70)
+    end
+end)
+
+unwalkBtn.MouseButton1Click:Connect(function()
+    unwalkEnabled = not unwalkEnabled
+    unwalkBtn.Text = unwalkEnabled and "UNWALK: ON" or "UNWALK: OFF"
+    if unwalkEnabled then startUnwalk() else stopUnwalk() end
+end)
