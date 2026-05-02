@@ -2161,9 +2161,32 @@ do
     local col2 = -50
 
     local function makeMob(local stroke = Instance.new("UIStroke", btn)
+-- لون فضي
+btn.BackgroundColor3 = Color3.fromRGB(200,200,200)
+
+-- إطار أبيض لامع
+local stroke = Instance.new("UIStroke", btn)
 stroke.Color = Color3.fromRGB(255,255,255)
 stroke.Thickness = 1.5
 stroke.Transparency = 0
+
+-- لمعة تتحرك
+local gradient = Instance.new("UIGradient", stroke)
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,255,255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200,200,200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))
+}
+
+gradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.4, 0),
+    NumberSequenceKeypoint.new(0.6, 0),
+    NumberSequenceKeypoint.new(1, 1)
+})
+
+gradient.Rotation = 0
+table.insert(rotatingStrokes, gradient)
 
 local gradient = Instance.new("UIGradient", stroke)
 gradient.Color = ColorSequence.new{
