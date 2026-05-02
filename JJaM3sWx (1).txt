@@ -2160,7 +2160,27 @@ do
     local col1 = -110
     local col2 = -50
 
-    local function makeMob(label, xOffset, yOffset, toggleName, onAct)
+    local function makeMob(local stroke = Instance.new("UIStroke", btn)
+stroke.Color = Color3.fromRGB(255,255,255)
+stroke.Thickness = 1.5
+stroke.Transparency = 0
+
+local gradient = Instance.new("UIGradient", stroke)
+gradient.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(255,255,255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(200,200,200)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))
+}
+
+gradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 1),
+    NumberSequenceKeypoint.new(0.4, 0),
+    NumberSequenceKeypoint.new(0.6, 0),
+    NumberSequenceKeypoint.new(1, 1)
+})
+
+gradient.Rotation = 0
+table.insert(rotatingStrokes, gradient))
         local btnFrame, btnStroke = CreateButtonFrame(ScreenGui, UDim2.new(0, 52, 0, 52), UDim2.new(1, xOffset, 0.5, yOffset), 10)
         local btn = Instance.new("TextButton", btnFrame)
         btn.Size = UDim2.new(1, -2, 1, -2)
